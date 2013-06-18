@@ -1,3 +1,5 @@
+package programa;
+
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -24,13 +26,11 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.text.DefaultCaret;
 
 import raizprimaria.RaizPrimaria;
 import testeprimalidade.TestePrimalidade;
 import diffiehellman.AcordoChaves;
-import javax.swing.event.CaretListener;
-import javax.swing.event.CaretEvent;
-import javax.swing.text.DefaultCaret;
 
 public class Server extends JFrame {
 	private String separador = "\n------------------------------------------------------------------------------------------";
