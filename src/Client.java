@@ -37,6 +37,7 @@ import diffiehellman.AcordoChaves;
 
 public class Client extends JFrame {
    Key key = null;
+   private String separador = "\n------------------------------------------------------------------------------------------";
    private JTextField enter;
    private JTextArea display;
    ObjectOutputStream output;
@@ -74,39 +75,42 @@ public class Client extends JFrame {
       Socket client;
     
       try {
-         display.setText( "Attempting connection\n" );
+         log( "Conectando" );
          client = new Socket( InetAddress.getByName( "127.0.0.1" ), 5050 );
-         display.append( "Connected to: " + client.getInetAddress().getHostName() );
          output = new ObjectOutputStream( client.getOutputStream() );
          output.flush();
          input = new ObjectInputStream( client.getInputStream() );
-         display.append( "\nGot I/O streams\n" );
-         enter.setEnabled( true );
-         String okConnection = null;
+         TypeRequest okConnection = null;
          while(okConnection==null){
-        	 okConnection = (String) input.readObject();
+        	 okConnection = (TypeRequest) input.readObject();
          }
-         display.append( okConnection );
+         log( "Conectado com: " + client.getInetAddress().getHostName() );
+		 log("Servidor conectado");
+         
          //Begin - RSA
          //recebe nome do cifrador que devera ser usado
+         intervalo();
+         log( "Inicio RSA" );
          LoaderKeyPair loader = new LoaderKeyPair();
 		 KeyPair keyPair = loader.LoadKeyPair("C:/testes", "RSA");
-		
+		 log("Chave Publica: "+keyPair.getPublic().toString());
          byte[] encripted = (byte[]) input.readObject();
+         log("Texto recebido (cifrado - rsa): "+encripted);
          String decriptedMsg = RSA.decrypt(keyPair.getPublic(), encripted);
-         System.out.println(decriptedMsg);
+         log("Texto recebido (decifrado - rsa): "+decriptedMsg);
          //end - RSA  
+         intervalo();
          String NomeCifrador = decriptedMsg.replace("Cifrador:", "");
+         log("Cifrador escolhido: "+NomeCifrador);
+         intervalo();
          if(NomeCifrador.equals("AES/ECB/PKCS5Padding")){
+        	 
         	 //Begin -  Diffie
+        	 log("Iniciando Acordo de Chave (diffie hellman)");
         	 Request request = new Request(TypeRequest.INICIARDIFFIEHELLMAN);
         	 output.writeObject( request );
         	 output.flush();
-        	 display.append(  "\n" + request.type.toString() );
-        	 display.setCaretPosition( display.getText().length() );
         	 Request ok = (Request) input.readObject();
-        	 display.append( "\n" + ok.type.toString() );
-        	 display.setCaretPosition( display.getText().length() );
         	 if(ok.type.equals(TypeRequest.OK)){
         		 key = diffieHellman();
         	 }
@@ -114,14 +118,16 @@ public class Client extends JFrame {
         	 //Begin Cifrador
         	 Cipher aes = Cipher.getInstance("AES/ECB/PKCS5Padding");
         	 aes.init(Cipher.DECRYPT_MODE, key);
+        	 intervalo();
+        	 log("Inicio da troca de mensagens");
+        	 intervalo();
+             enter.setEnabled( true );
         	 do {              
         		 try {
         			 byte[] ciphertext =(byte[]) input.readObject();
         			 String cleartext = new String(aes.doFinal(ciphertext));
-        			 display.append( "\n SERVER >>> " + new String(ciphertext) );                 
-        			 display.setCaretPosition(display.getText().length() );
-        			 display.append( "\n SERVER (mensagem decifrada)>>> " + cleartext );
-        			 display.setCaretPosition(display.getText().length() );
+        			 log( "msg recebida: " + ciphertext );                           
+        			 log( "msg decifrada: " + cleartext );
         		 }
         		 catch ( Exception e ) {
         			 e.printStackTrace();
@@ -146,11 +152,14 @@ public class Client extends JFrame {
         /*Chama metodo que que gerará um numero primo 
          * e armazena em primo
          */
-       BigInteger primo = new BigInteger((String)input.readObject());        
+       BigInteger primo = new BigInteger((String)input.readObject());
+       log("Primo gerado: " + primo.toString());
+       
        /*chama metodo que calculara a primeira raiz primitiva de primo
         * exceto 2 e armazena em raizPrimaria
         */
        BigInteger raizPrimaria=new BigInteger((String)input.readObject());
+       log("Raiz primaria calculada: " + raizPrimaria.toString());
        
         /*Cria dois individuos que desejam aplicar o difiie ellman
          * 
@@ -162,7 +171,7 @@ public class Client extends JFrame {
          * e armazenam em ya e yb
          */
         BigInteger ya=bob.acordoChaves(primo, raizPrimaria);
-        display.append( "\nSERVER>>> yb :"+ya.toString() );
+        log( "YB: "+ya.toString() );
         
         
         
@@ -176,13 +185,11 @@ public class Client extends JFrame {
         BigInteger yb=new BigInteger((String)input.readObject());
        
         bob.geraChaves(yb);
-        display.append( "\nSERVER>>> chave :"+bob.getChave().toString());
+        log( "Chave do acordo: "+bob.getChave().toString());
      
         /*
          * Para alice e bob chama o metodo que imprime os seus dados na tela 
          */
-        bob.mostraDados();
-        
         
         byte[] key = bob.getChave().toString().getBytes("UTF-8");
 		try {
@@ -227,4 +234,19 @@ private void sendData( String s )
 
       app.runClient();
    }
+   
+   public void intervalo() {
+		display.append(separador);
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+		}
+	}
+	public void log(String msg) {
+		display.append("\n"+msg);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+		}
+	}
 }
