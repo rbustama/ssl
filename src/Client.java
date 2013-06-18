@@ -1,7 +1,7 @@
 
-import diffiehellman.AcordoChaves;
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -16,20 +16,15 @@ import java.security.Key;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.KeySpec;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-
-import org.bouncycastle.util.encoders.Base64;
+import javax.swing.text.DefaultCaret;
 
 import raizprimaria.RaizPrimaria;
 import testeprimalidade.TestePrimalidade;
@@ -63,11 +58,13 @@ public class Client extends JFrame {
       c.add( enter, BorderLayout.NORTH );
 
       display = new JTextArea();
+      DefaultCaret caret = (DefaultCaret)display.getCaret();
+      caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
       c.add( new JScrollPane( display ),
              BorderLayout.CENTER );
-
-      setSize( 300, 150 );
-      show();
+      this.setPreferredSize(new Dimension(500, 300));
+      this.setSize(getPreferredSize());
+      setVisible(true);
    }
 
    public void runClient() throws IOException 
@@ -92,7 +89,7 @@ public class Client extends JFrame {
          intervalo();
          log( "Inicio RSA" );
          LoaderKeyPair loader = new LoaderKeyPair();
-		 KeyPair keyPair = loader.LoadKeyPair("C:/testes", "RSA");
+		 KeyPair keyPair = loader.LoadKeyPair("./", "RSA");
 		 log("Chave Publica: "+keyPair.getPublic().toString());
          byte[] encripted = (byte[]) input.readObject();
          log("Texto recebido (cifrado - rsa): "+encripted);

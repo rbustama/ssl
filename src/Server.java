@@ -1,39 +1,36 @@
 
-import diffiehellman.AcordoChaves;
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+
 import raizprimaria.RaizPrimaria;
 import testeprimalidade.TestePrimalidade;
+import diffiehellman.AcordoChaves;
+import javax.swing.event.CaretListener;
+import javax.swing.event.CaretEvent;
+import javax.swing.text.DefaultCaret;
 
 public class Server extends JFrame {
 	private String separador = "\n------------------------------------------------------------------------------------------";
@@ -58,10 +55,12 @@ public class Server extends JFrame {
 		c.add(enter, BorderLayout.NORTH);
 
 		display = new JTextArea();
+		DefaultCaret caret = (DefaultCaret)display.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		c.add(new JScrollPane(display), BorderLayout.CENTER);
-
-		setSize(300, 150);
-		show();
+		this.setPreferredSize(new Dimension(500, 300));
+		this.setSize(getPreferredSize());
+		setVisible(true);
 	}
 
 	public void runServer() {
@@ -86,7 +85,7 @@ public class Server extends JFrame {
 				intervalo();
 				log("Inicio RSA");
 				LoaderKeyPair loader = new LoaderKeyPair();
-				KeyPair keyPair = loader.LoadKeyPair("C:/testes", "RSA");
+				KeyPair keyPair = loader.LoadKeyPair("./", "RSA");
 				log("Chave Privada: "+keyPair.getPrivate().toString());
 				String cifrador = "Cifrador:AES/ECB/PKCS5Padding";
 				log("Texto enviado (decifrado - rsa): "+cifrador);
