@@ -75,15 +75,17 @@ public class LoaderKeyPair {
 			throws IOException, NoSuchAlgorithmException,
 			InvalidKeySpecException {
 		// Read Public Key.
-		File filePublicKey = new File(path + "/public.key");
-		FileInputStream fis = new FileInputStream(path + "/public.key");
+		path = getClass().getResource(path).getPath();
+		path = path.replaceAll("%20", " ");
+		File filePublicKey = new File(path + "../public.key");
+		FileInputStream fis = new FileInputStream(path + "../public.key");
 		byte[] encodedPublicKey = new byte[(int) filePublicKey.length()];
 		fis.read(encodedPublicKey);
 		fis.close();
  
 		// Read Private Key.
-		File filePrivateKey = new File(path + "/private.key");
-		fis = new FileInputStream(path + "/private.key");
+		File filePrivateKey = new File(path + "../private.key");
+		fis = new FileInputStream(path + "../private.key");
 		byte[] encodedPrivateKey = new byte[(int) filePrivateKey.length()];
 		fis.read(encodedPrivateKey);
 		fis.close();
