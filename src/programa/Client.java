@@ -47,6 +47,7 @@ public class Client extends JFrame {
       Container c = getContentPane();
 
       enter = new JTextField();
+      enter.setText("Digite uma msg para enviar");
       enter.setEnabled( false );
       enter.addActionListener(
          new ActionListener() {
