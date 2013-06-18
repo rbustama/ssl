@@ -58,7 +58,7 @@ public class Server extends JFrame {
 		DefaultCaret caret = (DefaultCaret)display.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		c.add(new JScrollPane(display), BorderLayout.CENTER);
-		this.setPreferredSize(new Dimension(500, 300));
+		this.setPreferredSize(new Dimension(400, 600));
 		this.setSize(getPreferredSize());
 		setVisible(true);
 	}
@@ -85,11 +85,7 @@ public class Server extends JFrame {
 				intervalo();
 				log("Inicio RSA");
 				LoaderKeyPair loader = new LoaderKeyPair();
-<<<<<<< HEAD
-				KeyPair keyPair = loader.LoadKeyPair("C:/testes", "RSA");
-=======
 				KeyPair keyPair = loader.LoadKeyPair("./", "RSA");
->>>>>>> f91a4cfe3aec5ecb67b0f6b2827101a953c7624e
 				log("Chave Privada: "+keyPair.getPrivate().toString());
 				String cifrador = "Cifrador:AES/ECB/PKCS5Padding";
 				log("Texto enviado (decifrado - rsa): "+cifrador);
@@ -146,7 +142,7 @@ public class Server extends JFrame {
 	    	  byte[] ciphertext = aes.doFinal(s.getBytes());
 	    	  output.writeObject(ciphertext);
 	    	  output.flush();
-	    	  display.append( "\nSERVER>>>" + s );
+	    	  display.append( "\nmsg enviada: " + s );
 	      }
 	      catch ( Exception e ) {
 	    	  e.printStackTrace();

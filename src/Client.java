@@ -62,7 +62,7 @@ public class Client extends JFrame {
       caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
       c.add( new JScrollPane( display ),
              BorderLayout.CENTER );
-      this.setPreferredSize(new Dimension(500, 300));
+      this.setPreferredSize(new Dimension(400, 600));
       this.setSize(getPreferredSize());
       setVisible(true);
    }
@@ -89,11 +89,7 @@ public class Client extends JFrame {
          intervalo();
          log( "Inicio RSA" );
          LoaderKeyPair loader = new LoaderKeyPair();
-<<<<<<< HEAD
-		 KeyPair keyPair = loader.LoadKeyPair("C:/testes", "RSA");
-=======
 		 KeyPair keyPair = loader.LoadKeyPair("./", "RSA");
->>>>>>> f91a4cfe3aec5ecb67b0f6b2827101a953c7624e
 		 log("Chave Publica: "+keyPair.getPublic().toString());
          byte[] encripted = (byte[]) input.readObject();
          log("Texto recebido (cifrado - rsa): "+encripted);
@@ -213,7 +209,7 @@ private void sendData( String s )
     	  byte[] ciphertext = aes.doFinal(s.getBytes());
     	  output.writeObject(ciphertext);
     	  output.flush();
-    	  display.append( "\nCLIENT>>>" + s );
+    	  display.append( "\nmsg enviada: " + s );
       }
       catch ( Exception e ) {
     	  e.printStackTrace();
