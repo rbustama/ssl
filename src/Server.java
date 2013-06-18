@@ -36,6 +36,7 @@ import raizprimaria.RaizPrimaria;
 import testeprimalidade.TestePrimalidade;
 
 public class Server extends JFrame {
+	private String separador = "\n------------------------------------------------------------------------------------------";
 	private JTextField enter;
 	private JTextArea display;
 	ObjectOutputStream output;
@@ -71,50 +72,56 @@ public class Server extends JFrame {
 			server = new ServerSocket(5050, 100);
 			while (true) {
 				//abre conexao
-				display.setText("Waiting for connection\n");
+				log("Esperando Conexao");
 				connection = server.accept();
-				display.append("Connection, received from: " + connection.getInetAddress().getHostName());
+				log("Conexao, recebida: " + connection.getInetAddress().getHostName());
 				output = new ObjectOutputStream(connection.getOutputStream());
 				output.flush();
 				input = new ObjectInputStream(connection.getInputStream());
-				display.append("\nGot I/O streams\n");
-				String message = "SERVER>>> Connection successful";
-				output.writeObject(message);
+				log("Cliente conectado");
+				output.writeObject(TypeRequest.OK);
 				output.flush();
-				enter.setEnabled(true);
-
 				//begin RSA
 				//envia nome do cifrador cifrado com a chave privada
+				intervalo();
+				log("Inicio RSA");
 				LoaderKeyPair loader = new LoaderKeyPair();
 				KeyPair keyPair = loader.LoadKeyPair("C:/testes", "RSA");
-				byte[] encryptText = RSA.encrypt(keyPair.getPrivate(), "Cifrador:AES/ECB/PKCS5Padding");
+				log("Chave Privada: "+keyPair.getPrivate().toString());
+				String cifrador = "Cifrador:AES/ECB/PKCS5Padding";
+				log("Texto enviado (decifrado - rsa): "+cifrador);
+				byte[] encryptText = RSA.encrypt(keyPair.getPrivate(), cifrador );
+				log("Texto enviado (cifrado - rsa): "+encryptText);
 				output.writeObject(encryptText);
 				output.flush();
 				//end RSA
-				
+				intervalo();
+				log("Cifrador escolhido: "+cifrador);
+		        intervalo();
+		        
+		        //Begin -  Diffie
 				Request request = (Request) input.readObject();
-				display.append("\n" + request.toString());
-				display.setCaretPosition(display.getText().length());
+				log("Iniciando Acordo de Chave (diffie hellman)");
 				if (request.type.equals(TypeRequest.INICIARDIFFIEHELLMAN)) {
 					Request ok = new Request(TypeRequest.OK);
 					output.writeObject(ok);
 					output.flush();
-					display.append(request.type.toString());
-					display.setCaretPosition(display.getText().length());
-					
 					key = diffieHellman();
+		        	 //End Diffie
 					
 					 //Begin Cifrador
 		        	 Cipher aes = Cipher.getInstance("AES/ECB/PKCS5Padding");
 		        	 aes.init(Cipher.DECRYPT_MODE, key);
+		        	 intervalo();
+		        	 log("Inicio da troca de mensagens");
+		        	 intervalo();
+		             enter.setEnabled( true );
 		        	 do {              
 		        		 try {
 		        			 byte[] ciphertext =(byte[]) input.readObject();
 		        			 String cleartext = new String(aes.doFinal(ciphertext));
-		        			 display.append( "\n CLIENT >>> " + new String(ciphertext) );                           
-		        			 display.setCaretPosition(display.getText().length() );
-		        			 display.append( "\n CLIENT (mensagem decifrada)>>> " + cleartext );
-		        			 display.setCaretPosition(display.getText().length() );
+		        			 log( "msg recebida: " + ciphertext );                           
+		        			 log( "msg decifrada: " + cleartext );
 		        		 }
 		        		 catch ( Exception e ) {
 		        			 e.printStackTrace();
@@ -177,7 +184,7 @@ public class Server extends JFrame {
 		 * Chama metodo que que gerará um numero primo e armazena em primo
 		 */
 		BigInteger primo = prim.Primo();
-		display.append("\nSERVER>>> Primo gerado :" + primo.toString());
+		log("Primo gerado: " + primo.toString());
 		output.writeObject(primo.toString());
 		output.flush();
 		/*
@@ -185,7 +192,7 @@ public class Server extends JFrame {
 		 * 2 e armazena em raizPrimaria
 		 */
 		BigInteger raizPrimaria = raiz.raizPrimaria(primo);
-		display.append("\nSERVER>>> Raiz primaria calculada :" + raizPrimaria.toString());
+		log("Raiz primaria calculada: " + raizPrimaria.toString());
 		output.writeObject(raizPrimaria.toString());
 		output.flush();
 		/*
@@ -198,7 +205,7 @@ public class Server extends JFrame {
 		 * trocado e armazenam em ya e yb
 		 */
 		BigInteger ya = alice.acordoChaves(primo, raizPrimaria);
-		display.append("\nSERVER>>> Ya :" + ya.toString());
+		log("YA: " + ya.toString());
 
 		/*
 		 * Com o numero enviado pelo individuo oposto o metodo gera chaves da
@@ -210,13 +217,11 @@ public class Server extends JFrame {
 
 		BigInteger yb = new BigInteger((String) input.readObject());
 		alice.geraChaves(yb);
-		display.append("\nSERVER>>>chave :" + alice.getChave().toString());
+		log("Chave do acordo: " + alice.getChave().toString());
 
 		/*
 		 * Para alice e bob chama o metodo que imprime os seus dados na tela
 		 */
-		alice.mostraDados();
-
 		
 		byte[] key = alice.getChave().toString().getBytes("UTF-8");
 		try {
@@ -230,4 +235,19 @@ public class Server extends JFrame {
 			return null;
 		}
 	}
+	public void intervalo() {
+		display.append(separador);
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+		}
+	}
+	public void log(String msg) {
+		display.append("\n"+msg);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+		}
+	}
+	
 }
